@@ -1,0 +1,12 @@
+{
+  "niche": "dev",
+  "channel_name": "tech_yatra",
+  "video_length_seconds_target": 45,
+  "fps": 30,
+  "resolution": { "width": 1080, "height": 1920 },
+  "voice": {
+    "en": "en-US-GuyNeural"
+  },
+  "privacy_status_on_upload": "public",
+  "category_id": "28"
+}

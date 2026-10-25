@@ -1,0 +1,19 @@
+{
+  "dev": {
+    "description": "Software development, .NET/C#, and practical AI engineering tips for working developers.",
+    "topic_pools": [
+      ".NET / C# tips and gotchas",
+      "ASP.NET Core performance and architecture",
+      "AI coding assistants and how to use them well",
+      "LLM / agent engineering concepts explained simply",
+      "Developer productivity and tooling",
+      "System design concepts explained in 45 seconds",
+      "Common bugs and how experienced devs spot them",
+      "Cloud/Azure practical tips for small teams",
+      "Database and SQL tricks",
+      "Career advice for software engineers"
+    ],
+    "tone": "practical, confident, no fluff, aimed at working developers and students learning to code",
+    "audience": "software developers, CS students, people learning AI-assisted coding"
+  }
+}

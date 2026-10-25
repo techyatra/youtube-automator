@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1080px; height: 1920px; overflow: hidden;
+    background: #0b1020;
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  #stage {
+    position: relative; width: 1080px; height: 1920px;
+    background: radial-gradient(circle at 50% 30%, #1a2040 0%, #0b1020 70%);
+    color: #f4f6ff;
+  }
+  .center {
+    position: absolute; left: 60px; right: 60px; top: 0; bottom: 0;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+  }
+  .title { font-size: 86px; font-weight: 800; line-height: 1.15; }
+  .subtitle { font-size: 44px; font-weight: 400; margin-top: 28px; color: #b9c2ff; }
+  .accent { color: #ffd166; }
+  .point-text { font-size: 72px; font-weight: 700; line-height: 1.25; }
+  .stat { font-size: 220px; font-weight: 900; color: #ffd166; }
+  .stat-label { font-size: 48px; margin-top: 16px; color: #d7dcff; }
+  .code-block {
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    font-size: 40px; line-height: 1.6; text-align: left;
+    background: #11162c; border: 2px solid #2b3464; border-radius: 24px;
+    padding: 48px; white-space: pre-wrap; color: #9ff7c5;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .compare {
+    display: flex; width: 100%; gap: 32px; justify-content: center;
+  }
+  .compare-col {
+    flex: 1; max-width: 460px; border-radius: 24px; padding: 40px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .compare-left { background: rgba(255, 90, 90, 0.12); border: 2px solid #ff5a5a; }
+  .compare-right { background: rgba(90, 255, 140, 0.12); border: 2px solid #5aff8c; }
+  .compare-label { font-size: 38px; font-weight: 800; }
+  .compare-left .compare-label { color: #ff8a8a; }
+  .compare-right .compare-label { color: #8affb0; }
+  .compare-text { font-size: 36px; line-height: 1.4; }
+  .fade-up {
+    opacity: 0; transform: translateY(40px);
+    transition: none;
+  }
+  #caption-bar {
+    position: absolute; left: 60px; right: 60px; bottom: 140px;
+    text-align: center; font-size: 46px; font-weight: 700;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.6);
+  }
+  #caption-bar .current { color: #ffd166; }
+  #caption-bar .pending { color: #e7eaff; opacity: 0.85; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="center" id="content"></div>
+  <div id="caption-bar"></div>
+</div>
+<script>
+let SCENE = null;
+
+function setScene(scene) {
+  SCENE = scene;
+  renderFrame(0);
+}
+
+function easeOut(x) { return 1 - Math.pow(1 - x, 3); }
+
+function applyEntrance(el, t, delay) {
+  const local = Math.max(0, Math.min(1, (t - delay) / 0.4));
+  const eased = easeOut(local);
+  el.style.opacity = String(eased);
+  el.style.transform = `translateY(${(1 - eased) * 40}px)`;
+}
+
+function renderContentForType(container, scene, t) {
+  const v = scene.visual || {};
+  if (scene.type === "title_card" || scene.type === "outro_card") {
+    container.innerHTML = `
+      <div class="title fade-up" id="el0">${escapeHtml(v.title || "")}</div>
+      <div class="subtitle fade-up" id="el1">${escapeHtml(v.subtitle || "")}</div>`;
+    applyEntrance(document.getElementById("el0"), t, 0.0);
+    applyEntrance(document.getElementById("el1"), t, 0.15);
+  } else if (scene.type === "text_point") {
+    container.innerHTML = `<div class="point-text fade-up" id="el0">${escapeHtml(v.text || "")}</div>`;
+    applyEntrance(document.getElementById("el0"), t, 0.0);
+  } else if (scene.type === "stat_card") {
+    container.innerHTML = `
+      <div class="stat fade-up" id="el0">${escapeHtml(v.stat || "")}</div>
+      <div class="stat-label fade-up" id="el1">${escapeHtml(v.label || "")}</div>`;
+    applyEntrance(document.getElementById("el0"), t, 0.0);
+    applyEntrance(document.getElementById("el1"), t, 0.2);
+  } else if (scene.type === "code_snippet") {
+    container.innerHTML = `<div class="code-block fade-up" id="el0">${escapeHtml(v.code || "")}</div>`;
+    applyEntrance(document.getElementById("el0"), t, 0.0);
+  } else if (scene.type === "comparison") {
+    container.innerHTML = `
+      <div class="compare fade-up" id="el0">
+        <div class="compare-col compare-left">
+          <div class="compare-label">${escapeHtml(v.left_label || "")}</div>
+          <div class="compare-text">${escapeHtml(v.left_text || "")}</div>
+        </div>
+        <div class="compare-col compare-right">
+          <div class="compare-label">${escapeHtml(v.right_label || "")}</div>
+          <div class="compare-text">${escapeHtml(v.right_text || "")}</div>
+        </div>
+      </div>`;
+    applyEntrance(document.getElementById("el0"), t, 0.0);
+  } else {
+    container.innerHTML = `<div class="point-text">${escapeHtml(v.text || scene.narration || "")}</div>`;
+  }
+}
+
+function renderCaptions(t) {
+  const bar = document.getElementById("caption-bar");
+  const words = (SCENE && SCENE.words) || [];
+  if (!words.length) { bar.innerHTML = ""; return; }
+  let idx = words.findIndex(w => t >= w.start && t < w.end);
+  if (idx === -1) {
+    idx = words.reduce((acc, w, i) => (w.start <= t ? i : acc), 0);
+  }
+  const windowStart = Math.max(0, idx - 2);
+  const windowEnd = Math.min(words.length, idx + 4);
+  const parts = [];
+  for (let i = windowStart; i < windowEnd; i++) {
+    const cls = i === idx ? "current" : "pending";
+    parts.push(`<span class="${cls}">${escapeHtml(words[i].text)}</span>`);
+  }
+  bar.innerHTML = parts.join(" ");
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function renderFrame(t) {
+  if (!SCENE) return;
+  renderContentForType(document.getElementById("content"), SCENE, t);
+  renderCaptions(t);
+}
+window.setScene = setScene;
+window.renderFrame = renderFrame;
+</script>
+</body>
+</html>
