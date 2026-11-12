@@ -1,9 +1,12 @@
 name: Generate and publish a YouTube Short
 
 on:
-  schedule:
-    # Every day at 14:00 UTC (~7:30 PM IST). Adjust to taste.
-    - cron: '0 14 * * *'
+  # Disabled for now — re-enable this once GEMINI_API_KEY and the
+  # YOUTUBE_* secrets are configured, otherwise this fires and fails
+  # every day for no reason.
+  # schedule:
+  #   # Every day at 14:00 UTC (~7:30 PM IST). Adjust to taste.
+  #   - cron: '0 14 * * *'
   workflow_dispatch:
     inputs:
       topic:
